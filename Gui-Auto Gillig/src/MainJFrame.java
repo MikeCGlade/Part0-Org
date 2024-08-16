@@ -23,6 +23,7 @@ public class MainJFrame extends JFrame {
         setTitle("Gillig Auto"); 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setIconImage(new ImageIcon("Icon//icon.png").getImage()); 
+        setResizable(false);
         setLocationRelativeTo(null);
         setAlwaysOnTop(true); 
 

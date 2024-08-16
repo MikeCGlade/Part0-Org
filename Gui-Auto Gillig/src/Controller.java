@@ -13,9 +13,14 @@ public class Controller implements ActionListener {
 
     public CSVWindow csvWindow;
 
+    public DirectoryManager directoryManager;
+
     public Controller (){
         mainFrame = new MainJFrame();
         addActionListeners();
+
+        directoryManager = new DirectoryManager();
+        directoryManager.createDirectory();
     }
 
     private void addActionListeners(){

@@ -1,4 +1,3 @@
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -6,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -45,7 +45,18 @@ public final class AddPartsWindow extends JFrame implements ActionListener, KeyL
 
     private DefaultListModel<String> gilligPartNumberModelList; 
 
+    private FileGenerator fileGenerator; 
+
+    private DirectoryManager directoryManager; 
+
+    private FileEditor fileEditor;
+
     AddPartsWindow(){
+        //File System Properties
+        directoryManager = new DirectoryManager();
+        fileGenerator = new FileGenerator();
+        fileEditor = new FileEditor(); 
+
         //Defaults
         setTitle("Gillig Auto - Add New Parts"); 
         setIconImage(new ImageIcon("Icon//icon.png").getImage()); 
@@ -63,17 +74,15 @@ public final class AddPartsWindow extends JFrame implements ActionListener, KeyL
 
         getGPartsArrayList = new ArrayList<>(); 
 
-        getGPartsArrayList.add("GILLIG12345");
-        getGPartsArrayList.add("GILLIG12345678");
-        getGPartsArrayList.add("GILLIG12345678678");
-        getGPartsArrayList.add("GILLIG12345sdfds678678");
-        getGPartsArrayList.add("GILLIG12345sdfdssdfsd678678");
-        getGPartsArrayList.add("GILLIG12345sdfds6sdfdf78678");
-        getGPartsArrayList.add("GILLIG12345sdfds6sdsdfhgjfdf78678");
-        getGPartsArrayList.add("GILLIG12345sdfds6sdsdfhgjfdfsdfd78678");
-        getGPartsArrayList.add("GILLIG12345sdfds6sdsdfhgjfdf78sdfsdssdd678");
-        getGPartsArrayList.add("GILLIG12345sdfds6sdsdfhgjfdfsdfdsfsdfsdfsdfsdfsdf78678");
-        getGPartsArrayList.add("HSDJFSJDHF");
+        File folder = new File(directoryManager.getDirectory()); 
+        File[] files = folder.listFiles();
+
+        for (File file : files){
+            if (file.isFile()){
+                String name = file.getName().substring(0, file.getName().lastIndexOf('.'));
+                getGPartsArrayList.add(name);
+            }
+        }
 
         for (int i = 0; i < getGPartsArrayList.size(); i++){
             gilligPartNumberModelList.addElement(getGPartsArrayList.get(i));
@@ -105,6 +114,7 @@ public final class AddPartsWindow extends JFrame implements ActionListener, KeyL
     }
 
     private void instantiateComponents(){
+
         panel = new JPanel(); 
         panel.setPreferredSize(new Dimension(600, 600));
         panel.setBackground(Color.lightGray);
@@ -114,13 +124,19 @@ public final class AddPartsWindow extends JFrame implements ActionListener, KeyL
         fsiPartNumberLabel = new JLabel("FSI Part #:");
         quantityPerBoxLabel = new JLabel("Quantity per Box:");
 
+        //Textfields
         gilligPartNumberTF = new JTextField("Enter A Gillig Part Number");
         gilligPartNumberTF.setPreferredSize(new Dimension(500, 30));
+        
+
         fsiPartNumberTF = new JTextField("Enter FSI Part Number");
         fsiPartNumberTF.setPreferredSize(new Dimension(500, 30));
+
+
         quantityTextField = new JTextField("Enter Quantity");
         quantityTextField.setPreferredSize(new Dimension(500, 30));
 
+        //Button
         addPartButton = new JButton("Add Part");
         addPartButton.addActionListener(this);
 
@@ -163,10 +179,30 @@ public final class AddPartsWindow extends JFrame implements ActionListener, KeyL
 
     }
 
+    private void makeNewPart(String companyPartName, String fsiPartName, int amountPerBox){
+        //Create a new File with Custom File Name
+        fileGenerator.generateFile(companyPartName, directoryManager.getDirectory());
+        //Add the part to the array list
+        getGPartsArrayList.add(gilligPartNumberTF.getText());
+        gilligPartNumberModelList.addElement(getGPartsArrayList.get(getGPartsArrayList.size() - 1)); //
+
+        //Edit the File & add the info using File Editor Class
+        fileEditor.editNewFile(companyPartName, fsiPartName, amountPerBox);
+        //Clear the text fields
+        gilligPartNumberTF.setText("");
+        fsiPartNumberTF.setText("");
+        quantityTextField.setText("");
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == this.addPartButton) {
-            System.out.println("Added Part Debug");
+            if (quantityTextField.getText().matches("[0-9]+") && quantityTextField.getText().length() > 2) {
+                makeNewPart(gilligPartNumberTF.getText(), fsiPartNumberTF.getText(), Integer.parseInt(quantityTextField.getText()));
+            }else{
+                quantityTextField.setText("ERROR! INTEGERS ONLY NO FLOATING POINTS");
+            }
+            
         }
 
         if (e.getSource() == this.removePartButton) {
